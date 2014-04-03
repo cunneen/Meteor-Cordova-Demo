@@ -18,7 +18,7 @@ cordova platforms add android
 
 cat config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=ios\&cordova=3.4.0/" > merges/ios/config.xml  
 cat config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=android\&cordova=3.4.0/" > merges/android/config.xml
-cordova prepare ios
+cordova prepare
 cordova build
 
 cd ..
