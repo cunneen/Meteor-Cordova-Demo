@@ -16,8 +16,8 @@ cordova platforms add ios
 cordova platforms add android
 # Creating android project...
 
-cat merges/ios/config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=ios\&cordova=3.4.0/" > config.xml.temp && mv config.xml.temp merges/ios/config.xml 
-cat merges/android/config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=android\&cordova=3.4.0/" > config.xml.temp && mv config.xml.temp merges/android/config.xml 
+cat config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=ios\&cordova=3.4.0/" > merges/ios/config.xml  
+cat config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=android\&cordova=3.4.0/" > merges/android/config.xml
 cordova prepare ios
 cordova build
 
