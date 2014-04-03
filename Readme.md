@@ -63,7 +63,7 @@ cp -v ../app/platforms/ios/www/cordova*.js ./private/ios-3.4.0/
 # ../app/platforms/ios/www/cordova.js -> ./private/ios-3.4.0/cordova.js
 # ../app/platforms/ios/www/cordova_plugins.js -> ./private/ios-3.4.0/cordova_plugins.js
 
-cp -v ../app/platforms/android/assets/www/cordova*.js ./private/ios-3.4.0/
-# ../app/platforms/android/assets/www/cordova.js -> ./private/ios-3.4.0/cordova.js
-# ../app/platforms/android/assets/www/cordova_plugins.js -> ./private/ios-3.4.0/cordova_plugins.js
+cp -v ../app/platforms/android/assets/www/cordova*.js ./private/android-3.4.0/
+# ../app/platforms/android/assets/www/cordova.js -> ./private/android-3.4.0/cordova.js
+# ../app/platforms/android/assets/www/cordova_plugins.js -> ./private/android-3.4.0/cordova_plugins.js
 ```
