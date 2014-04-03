@@ -13,9 +13,11 @@ cordova create app net.cunneen Test-cordova-runtime-app
 cd app
 cordova platforms add ios
 # Creating ios project...
+cordova platforms add android
+# Creating android project...
 
-cat config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=ios\&cordova=3.4.0/" > config.xml.temp && mv config.xml.temp config.xml 
-
+cat merges/ios/config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=ios\&cordova=3.4.0/" > config.xml.temp && mv config.xml.temp merges/ios/config.xml 
+cat merges/android/config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=android\&cordova=3.4.0/" > config.xml.temp && mv config.xml.temp merges/android/config.xml 
 cordova prepare ios
 cordova build
 
@@ -49,13 +51,19 @@ echo '
     // Add the specific cordova file for android on cordova version 3.4.0
     cordovaRuntime.addFile("ios", "3.4.0", "ios-3.4.0/cordova.js");
     cordovaRuntime.addFile("ios", "3.4.0", "ios-3.4.0/cordova_plugins.js");
+    cordovaRuntime.addFile("android", "3.4.0", "android-3.4.0/cordova.js");
+    cordovaRuntime.addFile("android", "3.4.0", "android-3.4.0/cordova_plugins.js");
     // cordovaRuntime.addFile("android", "3.0.0", "plugin-3.0.0-android.js");
 ' > ./cordova.js
 cd ..
 mkdir private
 mkdir private/ios-3.4.0
+mkdir private/android-3.4.0
 cp -v ../app/platforms/ios/www/cordova*.js ./private/ios-3.4.0/
 # ../app/platforms/ios/www/cordova.js -> ./private/ios-3.4.0/cordova.js
 # ../app/platforms/ios/www/cordova_plugins.js -> ./private/ios-3.4.0/cordova_plugins.js
 
+cp -v ../app/platforms/android/assets/www/cordova*.js ./private/ios-3.4.0/
+# ../app/platforms/android/assets/www/cordova.js -> ./private/ios-3.4.0/cordova.js
+# ../app/platforms/android/assets/www/cordova_plugins.js -> ./private/ios-3.4.0/cordova_plugins.js
 ```
