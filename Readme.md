@@ -1,69 +1,88 @@
 Meteor Cordova Demo
 ===================
-
+## NOTE: THIS CURRENTLY DOESN'T WORK
 This is a demonstration of how to get a cordova app up and running and connecting to a meteor application.
 
 Here are the commands used to create it:
 
 ```sh
-cordova create app net.cunneen Test-cordova-runtime-app
-# Creating a new cordova project with name "Test-cordova-runtime-app" and id "net.cunneen" at location "/Users/mikecunneen/Documents/Meteor/app"
+###### start of user-configurable stuff ####
+export APPFOLDERNAME=app
+export APPNAME=Test-cordova-runtime-app
+export APPPREFIXID=net.cunneen
+export METEORFOLDERNAME=test-cordova-runtime
+export METEORSERVERPROTOCOL=http
+export METEORHOSTPORT=localhost:3000
+##### end of user-configurable stuff ####
+export CORDOVAVERSION=`cordova -v | cut -f1 -d"-"`
 
+echo 'Now creating a meteor project...'`echo ${METEORFOLDERNAME}`
+meteor create ${METEORFOLDERNAME}
 
-cd app
+cd ${METEORFOLDERNAME}
+echo 'This next step takes a while, it downloads cordova-specific plugins for meteor'
+mrt add cordova-runtime
+
+# put the platform-specific cordova javascript files into appropriate folders on the server.
+mkdir private
+mkdir private/ios-${CORDOVAVERSION}
+mkdir private/android-${CORDOVAVERSION}
+mkdir server
+
+cd ..
+
+#Creating a new cordova project with name ${APPNAME} and id ${APPPREFIXID} at location ${APPFOLDERNAME}
+cordova create ${APPFOLDERNAME} ${APPPREFIXID} ${APPNAME}
+
+# again, looks like we need a nap here while we wait for cordova.
+echo 'sleeping for 5 seconds...'
+sleep 5
+
+echo "======= start with cordova =============="
+echo 'Creating ios and android cordova projects...'
+cd ${APPFOLDERNAME}
 cordova platforms add ios
-# Creating ios project...
 cordova platforms add android
-# Creating android project...
 
-cat config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=ios\&cordova=3.4.0/" > merges/ios/config.xml  
-cat config.xml | sed "s/index\.html/http:\/\/localhost:3000\?platform=android\&cordova=3.4.0/" > merges/android/config.xml
+##### I Have to stop the script here and perform the next steps later ######
+##### (some sort of race condition: it looks like cordova runs background tasks) ######
+echo '... I shouldnt have to do this, but it seems we need to wait a while for cordova to finish. Sleeping for 10 seconds.'
+sleep 10
+
+echo 'putting appropriate URLs into the cordova app config.xml files...'
+mkdir -p merges/ios
+mkdir -p merges/android
+
+mkdir hooks/after_prepare
+echo "sed \"s/index\.html/${METEORSERVERPROTOCOL}:\/\/${METEORHOSTPORT}\?platform=android\&amp;cordova=${CORDOVAVERSION}/\" platforms/android/res/xml/config.xml > config.tmp && mv -f -v config.tmp platforms/android/res/xml/config.xml" > hooks/after_prepare/01_fix_android_contentsrc.sh
+chmod 755 hooks/after_prepare/01_fix_android_contentsrc.sh
+
+echo "sed \"s/index\.html/${METEORSERVERPROTOCOL}:\/\/${METEORHOSTPORT}\?platform=ios\&amp;cordova=${CORDOVAVERSION}/\" platforms/android/res/xml/config.xml > config.tmp && mv -f -v config.tmp platforms/ios/www/config.xml" > hooks/after_prepare/01_fix_ios_contentsrc.sh
+chmod 755 hooks/after_prepare/02_fix_ios_contentsrc.sh
+
 cordova prepare
 cordova build
 
-cd ..
+echo '... I shouldnt have to do this, but it seems we need to wait a while for cordova to finish. Sleeping for 10 seconds.'
+sleep 10
 
-meteor create test-cordova-runtime
-# test-cordova-runtime: created.
-# 
-# To run your new app:
-#    cd test-cordova-runtime
-#    meteor
+echo "======= done with cordova =============="
+echo "copying files from cordova to meteor server..."
 
-cd test-cordova-runtime/
-mrt add cordova-runtime
+echo "======= now copying stuff from cordova to meteor ====="
+cp -v platforms/ios/www/cordova*.js ../${METEORFOLDERNAME}/private/ios-${CORDOVAVERSION}/
 
-# This takes a while, you should eventually get lots of output here, 
-# finishing with:
-# Ok, everything's ready. Here comes Meteor!
-# 
-# cordova-runtime: Use Cordova for runtime solution
+cp -v platforms/android/assets/www/cordova*.js ../${METEORFOLDERNAME}/private/android-${CORDOVAVERSION}/
 
-mkdir server
-cd server
 
-# add cordova 
-echo '
-    // Cordova
-    console.log("Initializing Cordova");
-    var cordovaRuntime = new CordovaRuntime(Assets);
- 
-    // Add the specific cordova file for android on cordova version 3.4.0
-    cordovaRuntime.addFile("ios", "3.4.0", "ios-3.4.0/cordova.js");
-    cordovaRuntime.addFile("ios", "3.4.0", "ios-3.4.0/cordova_plugins.js");
-    cordovaRuntime.addFile("android", "3.4.0", "android-3.4.0/cordova.js");
-    cordovaRuntime.addFile("android", "3.4.0", "android-3.4.0/cordova_plugins.js");
-    // cordovaRuntime.addFile("android", "3.0.0", "plugin-3.0.0-android.js");
-' > ./cordova.js
-cd ..
-mkdir private
-mkdir private/ios-3.4.0
-mkdir private/android-3.4.0
-cp -v ../app/platforms/ios/www/cordova*.js ./private/ios-3.4.0/
-# ../app/platforms/ios/www/cordova.js -> ./private/ios-3.4.0/cordova.js
-# ../app/platforms/ios/www/cordova_plugins.js -> ./private/ios-3.4.0/cordova_plugins.js
-
-cp -v ../app/platforms/android/assets/www/cordova*.js ./private/android-3.4.0/
-# ../app/platforms/android/assets/www/cordova.js -> ./private/android-3.4.0/cordova.js
-# ../app/platforms/android/assets/www/cordova_plugins.js -> ./private/android-3.4.0/cordova_plugins.js
+# Tell our server where weve put the appropriate cordova scripts, so when the app client
+# asks for them it serves them up. 
+echo -e "// Cordova \n\
+    console.log(\"Initializing Cordova Runtime on the server\"); \n\
+    var cordovaRuntime = new CordovaRuntime(Assets); \n\
+    cordovaRuntime.addFile(\"ios\", \"${CORDOVAVERSION}\", \"ios-${CORDOVAVERSION}/cordova.js\"); \n\
+    cordovaRuntime.addFile(\"ios\", \"${CORDOVAVERSION}\", \"ios-${CORDOVAVERSION}/cordova_plugins.js\"); \n\
+    cordovaRuntime.addFile(\"android\", \"${CORDOVAVERSION}\", \"android-${CORDOVAVERSION}/cordova.js\"); \n\
+    cordovaRuntime.addFile(\"android\", \"${CORDOVAVERSION}\", \"android-${CORDOVAVERSION}/cordova_plugins.js\"); \n\
+" > ../${METEORFOLDERNAME}/server/cordova.js
 ```
