@@ -1,10 +1,3 @@
-Meteor Cordova Demo
-===================
-This is a demonstration of how to get a cordova app up and running and connecting to a meteor application.
-
-Here are the commands used to create it:
-
-```sh
 ###### start of user-configurable stuff ####
 export APPFOLDERNAME=meteorClientApp
 export APPNAME='Meteor Client App'
@@ -128,4 +121,3 @@ mrt 2>&1 &
 cd ../${APPFOLDERNAME}
 cordova emulate android
 cordova emulate ios
-```
