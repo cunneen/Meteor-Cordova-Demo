@@ -1,3 +1,8 @@
+OUTDATED
+========
+
+This pre-dates built-in meteor support for cordova. Preserved for posterity only.
+
 Meteor Cordova Demo
 ===================
 This is a demonstration of how to get a cordova app up and running and connecting to a meteor application.
